@@ -1,0 +1,36 @@
+WEB模块用来模拟服务器的启动暂停
+多个客户端的启动和关闭功能
+
+ServerController类
+服务启动调用
+http://localhost:8080/server/start
+模拟服务推送调用
+http://localhost:8080/server/simulation
+服务关闭
+http://localhost:8080/server/stop
+//界面模拟推送
+http://localhost:8080/server/autoPush/{clientId}/{topic}
+
+
+ClientController类
+开启一个新的客户端
+http://localhost:8080/client/ceate/00000  #其中00000为自己定义的客户端ID
+向服务器注册推送功能
+http://localhost:8080/client/registerToServer/00000  #其中00000为自己定义的客户端ID
+向服务器订阅消息
+http://localhost:8080/client/subscribeTopic/00000/topicOne   #其中00000位客户端ID，topicOne为消息类型，demo中可取的值有topicOne,TopicTwo
+向服务器取消订阅消息
+http://localhost:8080/client/cancelTopic/00000/topicOne 
+从服务器注销推送功能
+http://localhost:8080/client/logoutFromServer/00000
+关闭客户端
+http://localhost:8080/client/shutDown/00000
+
+查看服务器推送过来的消息内容
+http://localhost:8080/client/list
+消息格式如下
+客户端ID:消息内容（注意不同的topic）
+[
+"00000:{topicName:00000topicTwoName1716807214,topicId:00000topicTwoId1716807214,yyy:1716807214,boolType:true}",
+"11111:{topicName:11111topicOneName-2101988951,topicId:11111topicOneId-2101988951,xxx:xxx-2101988951}",
+]

@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.neusoft.grpc.proto.demo1";
+option java_outer_classname = "ServicePushDemo";
+
+//订阅服务
+service SubscribeTopic {
+	//注册到基于protoBuf格式的推送服务
+	rpc registerToServer (ClientInfo) returns (stream Message) {}
+	
+	//订阅某些主题,阻塞调用
+	rpc subscribeTopic (TopicInfo) returns (Status) {}
+	
+	//取消订阅某些主题,阻塞调用
+	rpc cancelTopic (TopicInfo) returns (Status){}
+	
+	//从服务注销,阻塞调用
+	rpc logoutFromServer (ClientInfo) returns (Status) {}
+	
+}
+
+message ClientInfo {
+	string clientId = 1;
+}
+
+message Status {
+	string status = 1;
+}
+
+//订阅信息
+message TopicInfo {
+	ClientInfo clientInfo = 1;
+	string topicName = 2;
+}
+
+//以ProtoBuf为通用格式返回数据
+message Message {
+	string topicName = 1;
+	string status = 2;
+	bytes message = 3;
+}
+
+//主题1
+message TopicOne {
+	string topicId = 1;
+	string topicName = 2;
+	string xxx=3;
+}
+
+//主题2
+message TopicTwo {
+	string topicId = 1;
+	string topicName = 2;
+	int32 yyy=3;
+	bool boolType = 4; 
+}
