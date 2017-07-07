@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLException;
+
 import com.neusoft.grpc.app.DemoClient;
 import com.neusoft.grpc.app.DemoServer;
 import com.neusoft.grpc.app.cache.DefaultClientCache;
@@ -25,8 +27,8 @@ public class CacheUtils {
 	/**
 	 * 启动一个Server,目前的Demo中只支持启动一个
 	 */
-	public static void createServer(int port) throws IOException {
-		demoServer = new DemoServer(port);
+	public static void createServer(int port, boolean usessl, String certChainFile, String privateKeyFile, boolean useInteceptor) throws IOException {
+		demoServer = new DemoServer(port, usessl, certChainFile, privateKeyFile, useInteceptor);
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -61,9 +63,10 @@ public class CacheUtils {
 	/**
 	 * 启动一个客户端
 	 * @param clientId
+	 * @throws IOException 
 	 */
-	public static void createClient(String clientId){
-		DemoClient client = new DemoClient("localhost", 8980, clientId);
+	public static void createClient(String clientId, String serverhost, int port, boolean usessl, String trustCertFile, boolean useInteceptor) throws IOException{
+		DemoClient client = new DemoClient(serverhost, port, clientId, usessl, trustCertFile, useInteceptor);
 		clientCache.put(clientId, client);
 	}
 	

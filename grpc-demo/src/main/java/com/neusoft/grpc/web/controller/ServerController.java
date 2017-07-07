@@ -3,6 +3,7 @@ package com.neusoft.grpc.web.controller;
 import java.io.IOException;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,25 @@ import io.grpc.stub.StreamObserver;
 @RestController
 @RequestMapping("/server")
 public class ServerController {
+	
+	@Value("${mygrpc.server-port}")
+	private int port;
+	
+	@Value("${mygrpc.use-ssl}")
+	private boolean usessl;
+	
+	@Value("${mygrpc.server-cert-chain-file}")
+	private String certChainFile;
+	
+	@Value("${mygrpc.server-private-key-file}")
+	private String privateKeyFile;
+	
+	@Value("${mygrpc.server-use-interceptor}")
+	private boolean useInterceptor;
+	
 	@GetMapping("/start")
 	public String start() throws IOException {
-		CacheUtils.createServer(8980);
+		CacheUtils.createServer(port, usessl, certChainFile, privateKeyFile,useInterceptor);
 		return "OK";
 	}
 	@GetMapping("/simulation")

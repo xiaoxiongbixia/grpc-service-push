@@ -1,0 +1,17 @@
+server:
+  port: 8080
+mygrpc:
+  server-port: 9443
+  server-host: test.grpc.com
+  use-ssl: false
+  server-use-interceptor: true
+  client-use-interceptor: true
+  #在spring tool suite中启动的时候配置如下格式，但是windows本身就不支持openssl的使用，所以测试失败。
+  server-cert-chain-file: classpath:ssl/ok/server.cer
+  server-private-key-file: classpath:ssl/ok/server.key
+  client-trust-cert-collection-file : classpath:ssl/ok/server.cer
+#  以下是打成jar包之后的配置方法, 在Linux上可以使用
+#  server-cert-chain-file: file:/tools/openssl/ok/server.cer
+#  server-private-key-file: file:/tools/openssl/ok/server.key
+#  client-trust-cert-collection-file : file:/tools/openssl/ok/server.cer
+  

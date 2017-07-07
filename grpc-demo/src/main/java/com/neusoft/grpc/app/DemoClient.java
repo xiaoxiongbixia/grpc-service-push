@@ -1,11 +1,14 @@
 package com.neusoft.grpc.app;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.neusoft.grpc.app.interceptor.DemoClientInteceptor;
 import com.neusoft.grpc.app.observer.DefaultObserver;
+import com.neusoft.grpc.app.utils.FileLoadUtils;
 import com.neusoft.grpc.proto.demo1.ClientInfo;
 import com.neusoft.grpc.proto.demo1.Status;
 import com.neusoft.grpc.proto.demo1.SubscribeTopicGrpc;
@@ -13,8 +16,13 @@ import com.neusoft.grpc.proto.demo1.TopicInfo;
 import com.neusoft.grpc.proto.demo1.SubscribeTopicGrpc.SubscribeTopicBlockingStub;
 import com.neusoft.grpc.proto.demo1.SubscribeTopicGrpc.SubscribeTopicStub;
 
+import io.grpc.Channel;
+import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NegotiationType;
+import io.grpc.netty.NettyChannelBuilder;
 
 public class DemoClient {
 	private static final Logger logger = LoggerFactory.getLogger(DemoClient.class);
@@ -25,19 +33,34 @@ public class DemoClient {
 	private final ClientInfo clientInfo;
 
 	public DemoClient(String host, int port, String clientId) {
-		this(ManagedChannelBuilder.forAddress(host, port).usePlaintext(true), clientId);
+		this(ManagedChannelBuilder.forAddress(host, port).usePlaintext(true), clientId, false);
+	}
+	
+	public DemoClient(String host, int port, String clientId, boolean useSSL, String trustCertFile, boolean useInteceptor) throws IOException {
+		this(useSSL ? NettyChannelBuilder.forAddress(host, port).usePlaintext(false)
+				.flowControlWindow(65 * 1024)
+				.negotiationType(NegotiationType.TLS)
+				.sslContext(GrpcSslContexts.forClient().trustManager(FileLoadUtils.loadFile(trustCertFile)).build())
+				: ManagedChannelBuilder.forAddress(host, port).usePlaintext(true), clientId, useInteceptor);
 	}
 
 	/**
 	 * Construct client for accessing RouteGuide server using the existing
-	 * channel.
+	 * channel.W
 	 */
-	public DemoClient(ManagedChannelBuilder<?> channelBuilder, String clientId) {
+	public DemoClient(ManagedChannelBuilder<?> channelBuilder, String clientId, boolean useInteceptor) {
 		this.clientId = clientId;
 		this.clientInfo = ClientInfo.newBuilder().setClientId(clientId).build();
 		this.channel = channelBuilder.build();
-		this.asyncStub = SubscribeTopicGrpc.newStub(channel);
-		this.blockingStub = SubscribeTopicGrpc.newBlockingStub(channel);
+		
+		if(useInteceptor){
+			Channel chanelI = ClientInterceptors.intercept(channelBuilder.build(), new DemoClientInteceptor());	
+			this.asyncStub = SubscribeTopicGrpc.newStub(chanelI);
+			this.blockingStub = SubscribeTopicGrpc.newBlockingStub(chanelI);			
+		}else{
+			this.asyncStub = SubscribeTopicGrpc.newStub(channel);
+			this.blockingStub = SubscribeTopicGrpc.newBlockingStub(channel);
+		}
 		logger.info("init client "+clientId);
 	}
 

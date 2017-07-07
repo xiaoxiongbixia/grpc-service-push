@@ -1,7 +1,9 @@
 package com.neusoft.grpc.web.controller;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +16,25 @@ import com.neusoft.grpc.app.utils.CacheUtils;
 @RequestMapping("/client")
 public class ClientController {
 
+	@Value("${mygrpc.server-port}")
+	private int port;
+	
+	@Value("${mygrpc.use-ssl}")
+	private boolean usessl;
+	
+	@Value("${mygrpc.server-host}")
+	private String serverhost;
+	
+	@Value("${mygrpc.client-trust-cert-collection-file}")
+	private String trustCertFile;
+	
+	@Value("${mygrpc.client-use-interceptor}")
+	private boolean useInterceptor;
+	
+	
 	@GetMapping("/create/{clientId}")
-	public String create(@PathVariable("clientId") String clientId){
-		CacheUtils.createClient(clientId);
+	public String create(@PathVariable("clientId") String clientId) throws IOException{
+		CacheUtils.createClient(clientId, serverhost, port,usessl, trustCertFile,useInterceptor);
 		return "OK";
 	}
 	@GetMapping("/subscribeTopic/{clientId}/{topic}")
